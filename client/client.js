@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 const askQuestion = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 const main = async () => {
-    const answer_method = await askQuestion('メソッドを入力してください: ');
+    const answer_method = await askQuestion('[floor, nroot, reverse, validAnagram, sort]\nメソッドを入力してください: ');
     const answer_params_raw = await askQuestion('パラメータを入力してください: ');
     rl.close();
 
