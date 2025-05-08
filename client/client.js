@@ -15,10 +15,19 @@ const main = async () => {
     const answer_params_raw = await askQuestion('パラメータを入力してください: ');
     rl.close();
 
-    const answer_params = answer_params_raw.split(" ").map(Number);
-    const answer_param_types = answer_params.map((elm) => {
-        return typeof elm == 'number' ? 'int' : typeof elm
+    const answer_params = answer_params_raw.split(" ").map((elm) => {
+        switch (answer_method) {
+            case 'floor':
+            case 'nroot':
+                return parseFloat(elm);
+            default:
+                return elm;
+        }
     });
+    const answer_param_types = answer_params.map((elm) => {
+        return typeof elm;
+    });
+
     const socketPath = '/tmp/unix.sock';
     const client = net.createConnection(socketPath, () => {
         client.write(JSON.stringify({
