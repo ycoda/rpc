@@ -1,5 +1,6 @@
 from server_socket_handler import ServerSocketHandler
 from request_handler import RequestHandler
+import threading
 
 def main():
     socket_handler = ServerSocketHandler()
@@ -12,8 +13,9 @@ def main():
         while True:
             # クライアントからの接続を受け入れ、クライアントソケットを取得する
             client_socket = socket_handler.accept_connection()
-            # クライアントからのリクエストを処理する
-            request_handler.handle_request(client_socket)
+            # スレッドを作成し、同時接続を可能にする
+            client_thread = threading.Thread(target=request_handler.handle_request, args=(client_socket,))
+            client_thread.start()
     except KeyboardInterrupt:
         print("Server stopped user.")
     finally:
