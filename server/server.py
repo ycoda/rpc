@@ -1,41 +1,25 @@
-import socket
-import os
-import json
+from server_socket_handler import ServerSocketHandler
+from request_handler import RequestHandler
 
-sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-server_address = '/tmp/unix.sock'
+def main():
+    socket_handler = ServerSocketHandler()
+    request_handler = RequestHandler()
 
-try:
-    os.unlink(server_address)
-except FileNotFoundError:
-    pass
-
-print('starting up on {}'.format(server_address))
-sock.bind(server_address)
-sock.listen(1)
-
-while True:
-    connection, client_address = sock.accept()
     try:
-        print('connection from {}'.format(client_address))
-        data = connection.recv(2048)
-        if data:
-            message = data.decode('utf-8')
-            json_data = json.loads(message)
-            print('Receive:', json_data)
+        # ソケットを作成してpathにバインドしてリスニング状態に設定する
+        socket_handler.create_and_bind_socket()
 
-            response = json.dumps({
-                "result": 19,
-                "id": json_data.get("id", None)
-            })
-            connection.sendall(response.encode('utf-8'))
-        else:
-            print('no data from {}'.format(client_address))
-    except json.JSONDecodeError:
-        print('Invalid JSON data received: {}'.format(data))
-    except Exception as e:
-        print('An error occurred: {}'.format(e))
+        while True:
+            # クライアントからの接続を受け入れ、クライアントソケットを取得する
+            client_socket = socket_handler.accept_connection()
+            # クライアントからのリクエストを処理する
+            request_handler.handle_request(client_socket)
+    except KeyboardInterrupt:
+        print("Server stopped user.")
     finally:
-        connection.close()
-        print('removed {}'.format(client_address))
-    
+        # サーバーソケットを閉じてリソースを解放する
+        socket_handler.close_socket()
+
+# server.pyスクリプトが直接実行された場合にmain()を呼び出す
+if __name__ == "__main__":
+    main()
